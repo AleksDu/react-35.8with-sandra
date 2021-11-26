@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { registerThunk, loginThunk, currentThunk, logoutThunk } from "./thunks";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const authSlice = createSlice({
   name: "auth",
@@ -112,6 +113,54 @@ const authSlice = createSlice({
 });
 export const { renameProp } = authSlice.actions;
 export default authSlice.reducer;
+
 // =========== PRODUCTS ==============
-// const BASE_PRODUCT_URL = `https://619d2ffb131c600017088dd7.mockapi.io/api/v1/`;
-// const products = `/products`;
+const BASE_PRODUCT_URL = `https://619d2ffb131c600017088dd7.mockapi.io/api/v1/`;
+const products = `/products`;
+export const productAPpiSlice = createApi({
+  reducerPath: "productsApi",
+  baseQuery: fetchBaseQuery({ baseUrl: BASE_PRODUCT_URL }),
+  tagTypes: [`Prods`],
+  endpoints: (builder) => {
+    return {
+      fetchProducts: builder.query({
+        query: () => products,
+        providesTags: (result, err, arg) => {
+          return [
+            ...result.map(({ id }) => {
+              console.log(id);
+              return {
+                type: "Prods",
+                id,
+              };
+            }),
+          ];
+        },
+      }),
+      addProduct: builder.mutation({
+        query: (prod) => {
+          return {
+            method: "POST",
+            url: products,
+            body: prod,
+          };
+        },
+        invalidatesTags: [`Prods`],
+      }),
+      removeProduct: builder.mutation({
+        query: (id) => {
+          return {
+            method: "DELETE",
+            url: `${products}/${id}`,
+          };
+        },
+        invalidatesTags: (res, err, id) => [{ type: "Prods", id }],
+      }),
+    };
+  },
+});
+export const {
+  useFetchProductsQuery,
+  useAddProductMutation,
+  useRemoveProductMutation,
+} = productAPpiSlice;

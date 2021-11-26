@@ -11,6 +11,7 @@ import {
   PURGE,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import { productAPpiSlice } from "./slices";
 const authPersistCongig = {
   key: "authToken",
   storage,
@@ -20,12 +21,13 @@ const authPersistReducer = persistReducer(authPersistCongig, authReducer);
 export const store = configureStore({
   reducer: {
     auth: authPersistReducer,
+    [productAPpiSlice.reducerPath]: productAPpiSlice.reducer,
   },
-  middleware: (getDefaultMiddlaware) =>
-    getDefaultMiddlaware({
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REGISTER, PAUSE, REHYDRATE, PERSIST, PURGE],
       },
-    }),
+    }).concat(productAPpiSlice.middleware),
 });
 export const persistor = persistStore(store);
